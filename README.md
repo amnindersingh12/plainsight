@@ -28,7 +28,7 @@ Each folder is its own Python package with its own README, tests and command. In
 A pull request comment, README or issue can carry instructions made of Unicode tag characters. Reviewers see
 nothing; an AI coding agent reads every one. `unseen` finds them, decodes them, and fails your build.
 
-**[Try it in your browser](https://amnindersingh12.github.io/plainsight/?demo=1)**: paste any text and see what is hidden in it. Nothing leaves the page.
+**[Try it in your browser](https://amnindersingh12.github.io/plainsight/index.html?demo=1)**: paste any text and see what is hidden in it. Nothing leaves the page.
 
 ```sh
 pipx install "git+https://github.com/amnindersingh12/plainsight#subdirectory=unseen"

@@ -5,7 +5,7 @@ Find invisible Unicode that hides instructions from humans but not from AI agent
 ![unseen finds an instruction hidden in an innocent-looking comment](https://raw.githubusercontent.com/amnindersingh12/plainsight/main/unseen/docs/demo.svg)
 
 
-**[Try it in your browser](https://amnindersingh12.github.io/plainsight/?demo=1)**: paste any text and see what is hidden in it. Nothing leaves the page.
+**[Try it in your browser](https://amnindersingh12.github.io/plainsight/index.html?demo=1)**: paste any text and see what is hidden in it. Nothing leaves the page.
 ## Why this matters
 
 Unicode "tag" characters (U+E0000-U+E007F) spell out ASCII without drawing anything. Zero-width characters and
