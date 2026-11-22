@@ -36,7 +36,7 @@ class CliTest(unittest.TestCase):
         code, s = out([str(make_png_lsb(d)), "-o", str(d / "r")])
         self.assertEqual(code, 0)
         self.assertEqual(s.splitlines()[1], f"[100] lsb         bit0,rgb,xy,msbfirst: {FLAG}")
-        html_ = (d / "r/index.html").read_text()
+        html_ = (d / "r/index.html").read_text(encoding="utf-8")
         self.assertIn(FLAG, html_)
         self.assertEqual(html_.count("<img "), 24)
         self.assertTrue((d / "r/lsb/bit0_rgb_xy_msbfirst.bin").exists())
@@ -57,7 +57,7 @@ class CliTest(unittest.TestCase):
         Image.new("RGBA", (8, 8)).save(d / "rgba.png")
         out([str(d / "rgba.png"), "-o", str(r)])
         out([str(make_png_text(d)), "-o", str(r)])
-        h = (r / "index.html").read_text()
+        h = (r / "index.html").read_text(encoding="utf-8")
         self.assertEqual(h.count("<img "), 24)
         self.assertNotIn("planes/A0.png", h)
 
@@ -110,7 +110,7 @@ class CliTest(unittest.TestCase):
         code, s = out([str(make_png_text(d, "<script>alert(1)</script>\x1b[2J")), "-o", str(d / "r")])
         self.assertNotIn("\x1b", s)
         self.assertIn("\\x1b[2J", s)
-        h = (d / "r/index.html").read_text()
+        h = (d / "r/index.html").read_text(encoding="utf-8")
         self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", h)
         self.assertNotIn("<script>alert", h)
 

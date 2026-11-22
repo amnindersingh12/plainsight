@@ -29,7 +29,8 @@ class LsbTest(unittest.TestCase):
         self.assertEqual(channel_orders(("L", "A")), ["l", "a", "la", "al"])
 
     def test_png_lsb_flag(self):
-        fs = sweep_image(Image.open(make_png_lsb(self.d)), R)
+        with Image.open(make_png_lsb(self.d)) as img:  # closed: Windows cannot delete open files
+            fs = sweep_image(img, R)
         self.assertEqual([f.title for f in fs if f.score == 100], [f"bit0,rgb,xy,msbfirst: {FLAG}"])
         f = next(f for f in fs if f.score == 100)
         self.assertEqual(f.name, "lsb/bit0_rgb_xy_msbfirst.bin")
@@ -45,7 +46,8 @@ class LsbTest(unittest.TestCase):
         self.assertEqual([f.title for f in sweep_image(img, R) if f.score == 100], [f"bit0-1,rgb,xy,msbfirst: {FLAG}"])
 
     def test_lsb_hidden_file(self):
-        fs = sweep_image(Image.open(make_png_lsb(self.d, SIGNATURES["zip"] + b"\0" * 20)), R)
+        with Image.open(make_png_lsb(self.d, SIGNATURES["zip"] + b"\0" * 20)) as img:
+            fs = sweep_image(img, R)
         self.assertIn("bit0,rgb,xy,msbfirst: zip file", [f.title for f in fs])
 
     def test_no_findings_on_plain_image(self):
@@ -66,11 +68,13 @@ class LsbTest(unittest.TestCase):
 
     def test_bit_planes(self):
         d = self.d
-        paths = save_bit_planes(Image.open(make_png_lsb(d)), d / "planes")
+        with Image.open(make_png_lsb(d)) as img:
+            paths = save_bit_planes(img, d / "planes")
         self.assertEqual(len(paths), 24)
         self.assertEqual(paths[0].name, "R0.png")
-        self.assertEqual(Image.open(d / "planes/R0.png").getpixel((0, 0)), 0)  # 'p' = 0b01110000: first bit 0
-        self.assertEqual(Image.open(d / "planes/G0.png").getpixel((0, 0)), 255)  # second bit 1
+        with Image.open(d / "planes/R0.png") as r0, Image.open(d / "planes/G0.png") as g0:
+            self.assertEqual(r0.getpixel((0, 0)), 0)  # 'p' = 0b01110000: first bit 0
+            self.assertEqual(g0.getpixel((0, 0)), 255)  # second bit 1
 
     def test_modes_do_not_crash(self):
         for mode in ("P", "L", "LA", "RGBA", "1", "I;16"):

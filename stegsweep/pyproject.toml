@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,7 +8,25 @@ version = "0.1.0"
 description = "One command, every steg check: local CTF steganography triage."
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["steganography", "ctf", "forensics", "lsb", "zsteg", "stegsolve", "security"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Utilities",
+]
 dependencies = ["Pillow>=10.0"]
 
 [project.scripts]
@@ -19,3 +37,6 @@ packages = ["stegsweep"]
 
 [project.urls]
 Homepage = "https://github.com/amnindersingh12/plainsight/tree/main/stegsweep"
+Source = "https://github.com/amnindersingh12/plainsight/tree/main/stegsweep"
+Issues = "https://github.com/amnindersingh12/plainsight/issues"
+Changelog = "https://github.com/amnindersingh12/plainsight/blob/main/CHANGELOG.md"

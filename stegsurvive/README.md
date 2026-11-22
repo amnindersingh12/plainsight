@@ -4,7 +4,7 @@ Hide a short message (up to 64 bytes) in a photo so it can still be read after W
 similar apps recompress and resize it. Classic LSB steganography loses the message at the first JPEG save;
 stegsurvive is built to survive it.
 
-![original, with a hidden message, after a WhatsApp-style recompress and resize, message revealed](docs/journey.png)
+![original, with a hidden message, after a WhatsApp-style recompress and resize, message revealed](https://raw.githubusercontent.com/amnindersingh12/plainsight/main/stegsurvive/docs/journey.png)
 
 *The bundled example: a 27-byte message hidden in a 2000x1250 photo, then shrunk to 1600x1000 and saved as
 JPEG quality 70 (our WhatsApp-style simulation). The message comes back exactly.*
@@ -31,7 +31,7 @@ stegsurvive hide my-photo.jpg "the key is under the mat" -o out.jpg
 stegsurvive reveal out.jpg
 ```
 
-![real terminal output of reveal, hide and reveal](docs/hide-reveal.svg)
+![real terminal output of reveal, hide and reveal](https://raw.githubusercontent.com/amnindersingh12/plainsight/main/stegsurvive/docs/hide-reveal.svg)
 
 **4. Send `out.jpg` through a real app** (WhatsApp, Telegram, Instagram...), save what arrives, and run
 `stegsurvive reveal` on it. `PASS` means every byte came back.
@@ -42,7 +42,7 @@ stegsurvive reveal out.jpg
 stegsurvive bench my-photo.jpg
 ```
 
-![real stegsurvive bench output: all 13 required attacks pass](docs/bench.svg)
+![real stegsurvive bench output: all 13 required attacks pass](https://raw.githubusercontent.com/amnindersingh12/plainsight/main/stegsurvive/docs/bench.svg)
 
 `bench` hides a random 64-byte message and runs it through the simulated attacks. It exits 0 when every
 required attack passes.
@@ -88,7 +88,7 @@ so use a long password.
 
 ## How it works
 
-![a 100% crop of the photo next to the embedding change amplified 25 times](docs/difference.jpg)
+![a 100% crop of the photo next to the embedding change amplified 25 times](https://raw.githubusercontent.com/amnindersingh12/plainsight/main/stegsurvive/docs/difference.jpg)
 
 *What hiding changes, amplified 25x: a smooth, fine texture with no blocks or edges. In this crop no pixel
 moves by more than 4 of 255 levels.*

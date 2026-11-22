@@ -1,0 +1,22 @@
+name: Feature request
+description: Suggest a check, option or improvement
+labels: [enhancement]
+body:
+  - type: dropdown
+    id: tool
+    attributes:
+      label: Tool
+      options: [unseen, stegsurvive, stegsweep, all / repo]
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would it solve?
+      description: A real case helps most, for example a CTF challenge stegsweep missed or text unseen let through.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like to happen?

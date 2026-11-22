@@ -70,7 +70,10 @@ class CoreTest(unittest.TestCase):
         for bad in ("../evil", "/tmp/evil", "a/../../evil"):
             with self.assertRaises(ValueError):
                 save_artifact(d, bad, b"")
-        (d / "link").symlink_to(d.parent)
+        try:
+            (d / "link").symlink_to(d.parent)
+        except OSError:  # Windows without the symlink privilege
+            return
         with self.assertRaises(ValueError):
             save_artifact(d, "link/evil", b"")
 

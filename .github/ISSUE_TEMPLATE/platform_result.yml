@@ -1,0 +1,48 @@
+name: stegsurvive platform result
+description: Tell us whether a hidden message survived a real app (WhatsApp, Instagram, Telegram, ...)
+title: "Platform result: "
+labels: [stegsurvive, platform-result]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Hide a message with `stegsurvive hide photo.png "test message" -o out.png` (or use `stegsurvive/examples/secret.jpg`),
+        send it through the app, download what the receiver gets, and run `stegsurvive reveal` on it.
+  - type: input
+    id: app
+    attributes:
+      label: App or website
+      placeholder: WhatsApp
+    validations:
+      required: true
+  - type: input
+    id: how
+    attributes:
+      label: How it was sent and saved
+      description: Platform (Android/iOS/web/desktop), quality setting such as "HD" or "standard", sent as photo or as file, how you downloaded it
+      placeholder: Android, sent as photo, standard quality, saved from the receiver's gallery
+    validations:
+      required: true
+  - type: input
+    id: sizes
+    attributes:
+      label: Image size before and after
+      placeholder: 4032x3024 PNG -> 1600x1200 JPEG
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result of stegsurvive reveal
+      options: [PASS (exact message), FAIL]
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: stegsurvive output
+      description: Paste the output of `stegsurvive reveal` and, if you can, `stegsurvive bench` on the original
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: stegsurvive version
+      placeholder: "0.1.0"

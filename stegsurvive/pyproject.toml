@@ -10,6 +10,23 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
+keywords = ["steganography", "watermarking", "jpeg", "image", "reed-solomon", "privacy"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Security :: Cryptography",
+]
 dependencies = ["Pillow>=10", "numpy>=1.24"]
 
 [project.optional-dependencies]
@@ -23,3 +40,6 @@ packages = ["stegsurvive"]
 
 [project.urls]
 Homepage = "https://github.com/amnindersingh12/plainsight/tree/main/stegsurvive"
+Source = "https://github.com/amnindersingh12/plainsight/tree/main/stegsurvive"
+Issues = "https://github.com/amnindersingh12/plainsight/issues"
+Changelog = "https://github.com/amnindersingh12/plainsight/blob/main/CHANGELOG.md"

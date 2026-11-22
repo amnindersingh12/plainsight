@@ -4,7 +4,7 @@ One command, every first steg check. `stegsweep` takes a CTF file (image, audio 
 you would otherwise run by hand with zsteg, stegsolve, binwalk, exiftool, strings and steghide, and lists the
 likely flags first.
 
-![stegsweep finding a flag inside a zip appended to a JPEG](docs/demo.svg)
+![stegsweep finding a flag inside a zip appended to a JPEG](https://raw.githubusercontent.com/amnindersingh12/plainsight/main/stegsweep/docs/demo.svg)
 
 - Local and offline: nothing is uploaded.
 - One dependency (Pillow). External tools are used when installed and skipped when not.
@@ -20,7 +20,7 @@ Python 3.10+. Or with pip in a virtual environment: `pip install "git+https://gi
 
 ## Solve your first challenge
 
-The repo ships five practice files in [`examples/`](examples/), each hiding a flag a different way.
+The repo ships five practice files in [`examples/`](https://github.com/amnindersingh12/plainsight/tree/main/stegsweep/examples), each hiding a flag a different way.
 
 **1. Get the examples.**
 
@@ -54,7 +54,7 @@ report: report/index.html
 
 Open `report/index.html` in a browser:
 
-![stegsweep HTML report: findings table and the 24 bit planes of the image](docs/report.png)
+![stegsweep HTML report: findings table and the 24 bit planes of the image](https://raw.githubusercontent.com/amnindersingh12/plainsight/main/stegsweep/docs/report.png)
 
 The raw stream is in `report/lsb/bit0_rgb_xy_msbfirst.bin`:
 
@@ -82,7 +82,7 @@ notes: exiftool not installed, skipped; binwalk not installed, skipped; steghide
 ```
 
 `examples/02-sunset.jpg` (shown at the top) and `examples/05-mountains.jpg` are left for you. Hints and answers
-are in [`examples/README.md`](examples/README.md).
+are in [`examples/README.md`](https://github.com/amnindersingh12/plainsight/blob/main/stegsweep/examples/README.md).
 
 ## Usage
 
@@ -169,8 +169,8 @@ python -m venv .venv && .venv/bin/pip install -e .
 
 ## See also
 
-- [unseen](../unseen): scan text and code for invisible Unicode used in AI prompt injection.
-- [stegsurvive](../stegsurvive): hidden messages that survive social media recompression.
+- [unseen](https://github.com/amnindersingh12/plainsight/tree/main/unseen): scan text and code for invisible Unicode used in AI prompt injection.
+- [stegsurvive](https://github.com/amnindersingh12/plainsight/tree/main/stegsurvive): hidden messages that survive social media recompression.
 
 ## License
 
