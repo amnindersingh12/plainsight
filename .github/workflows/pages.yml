@@ -28,7 +28,7 @@ jobs:
           mkdir -p site/py/stegsurvive site/examples
           cp stegsurvive/stegsurvive/{__init__,core,rs,attacks}.py site/py/stegsurvive/
           cp stegsurvive/examples/secret.jpg site/examples/
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
           path: site
