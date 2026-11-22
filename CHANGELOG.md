@@ -3,6 +3,13 @@
 All notable changes to the three packages in this repository. Versions are per package; release tags
 (`v0.1.0`, `v0.2.0`, ...) cover the whole repository.
 
+## v0.2.2 - 2026-11-23
+
+- CI: GitHub Actions bumped (setup-node v7, upload-artifact v7, download-artifact v8, deploy-pages v5,
+  upload-pages-artifact v5).
+- Release workflow: packages are built on every release; the PyPI upload runs only once the repository
+  variable `PYPI_PUBLISH` is `true` (after the PyPI trusted publishers are set up).
+
 ## v0.2.1 - 2026-11-22
 
 - stegsurvive 0.1.1: screenshots, documents, logos on transparent backgrounds and photos with black borders

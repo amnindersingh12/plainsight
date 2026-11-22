@@ -35,6 +35,8 @@ jobs:
 
   publish:
     needs: build
+    # Off until the PyPI trusted publishers exist; then set repo variable PYPI_PUBLISH=true (Settings > Variables).
+    if: vars.PYPI_PUBLISH == 'true'
     strategy:
       matrix:
         package: ${{ fromJSON(github.event_name == 'workflow_dispatch' && format('["{0}"]', inputs.package) || '["unseen","stegsweep","stegsurvive"]') }}
