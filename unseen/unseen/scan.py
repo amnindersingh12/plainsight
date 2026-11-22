@@ -97,14 +97,14 @@ def read_text(path: str) -> tuple[str, str] | None:
 
 
 def scan_text(text: str, path: str, strict: bool = False,
-              allow: frozenset[int] = frozenset()) -> tuple[list[Finding], int]:
+              allow: frozenset[int] = frozenset(), kind: str | None = None) -> tuple[list[Finding], int]:
     """Findings for one text, minus those the ignore marker silences (returned as a count).
 
     The marker never silences a failing tag or bidi finding: those are the payloads it would hide.
     A line ends at LF or CR, so a CR-only file is not one long line.
     """
     kept, ignored = [], 0
-    for f in find(text, kind_for(path), strict, allow):
+    for f in find(text, kind or kind_for(path), strict, allow):
         lo = max(text.rfind("\n", 0, f.start), text.rfind("\r", 0, f.start)) + 1
         eol = EOL.search(text, f.end)
         silenced = IGNORE_MARKER in text[lo:eol.start() if eol else len(text)]
@@ -113,6 +113,20 @@ def scan_text(text: str, path: str, strict: bool = False,
         else:
             kept.append(dataclasses.replace(f, path=path))
     return kept, ignored
+
+
+# GitHub event payload objects whose title/body humans and agents read (issues, PRs, comments, reviews).
+EVENT_OBJECTS = ("pull_request", "issue", "comment", "review", "discussion")
+
+
+def event_texts(event: dict) -> list[tuple[str, str]]:
+    """(field, text) for every non-empty title/body in a GitHub event payload, e.g. ("issue.body", "...")."""
+    out = []
+    for key in EVENT_OBJECTS:
+        obj = event.get(key)
+        if isinstance(obj, dict):
+            out += [(f"{key}.{f}", obj[f]) for f in ("title", "body") if isinstance(obj.get(f), str) and obj[f]]
+    return out
 
 
 def fix_text(text: str, findings: list[Finding]) -> str:

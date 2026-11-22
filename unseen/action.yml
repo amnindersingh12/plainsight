@@ -1,5 +1,5 @@
 name: unseen
-description: Fail on invisible Unicode (hidden prompt injection, Trojan Source) in changed files
+description: Fail on invisible Unicode (hidden prompt injection, Trojan Source) in changed files, issues, PRs and comments
 branding:
   icon: eye-off
   color: gray-dark
@@ -9,9 +9,13 @@ inputs:
     required: false
     default: ""
   args:
-    description: Extra scan flags, for example --strict
+    description: Extra flags for both scans, for example --strict
     required: false
     default: ""
+  event-text:
+    description: "Also scan the issue, pull request, comment and review text of the triggering event (true/false)."
+    required: false
+    default: "true"
 runs:
   using: composite
   steps:
@@ -19,13 +23,28 @@ runs:
       env:
         PYTHONPATH: ${{ github.action_path }}
         BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        EVENT_NAME: ${{ github.event_name }}
         INPUT_PATHS: ${{ inputs.paths }}
         INPUT_ARGS: ${{ inputs.args }}
+        INPUT_EVENT_TEXT: ${{ inputs.event-text }}
       run: |
         set -euo pipefail
         # INPUT_ARGS and INPUT_PATHS are word-split on purpose; "--" keeps file names from parsing as flags.
+        # Event text and file names come only from env and files, never from ${{ }} inside this script.
+        rc=0
+        if [ "$INPUT_EVENT_TEXT" = "true" ] && [ -n "${GITHUB_EVENT_PATH:-}" ] && [ -f "$GITHUB_EVENT_PATH" ]; then
+          python3 -m unseen.cli event --format github $INPUT_ARGS -- "$GITHUB_EVENT_PATH" || rc=$?
+        fi
+        case "$EVENT_NAME" in
+          issues|issue_comment|discussion|discussion_comment|pull_request_review|pull_request_review_comment)
+            text_only=1 ;;
+          *) text_only=0 ;;
+        esac
+        frc=0
         if [ -n "$INPUT_PATHS" ]; then
-          python3 -m unseen.cli scan --format github $INPUT_ARGS -- $INPUT_PATHS
+          python3 -m unseen.cli scan --format github $INPUT_ARGS -- $INPUT_PATHS || frc=$?
+        elif [ "$text_only" = 1 ]; then
+          :  # nothing checked out to scan; the event text above is the content
         elif [ -n "$BASE_SHA" ]; then
           if ! git rev-parse -q --verify "$BASE_SHA^{commit}" > /dev/null; then
             echo "unseen: base commit missing, use actions/checkout with fetch-depth: 0"
@@ -34,9 +53,10 @@ runs:
           mapfile -d '' files < <(git diff --name-only -z --diff-filter=d "$BASE_SHA" HEAD)
           if [ "${#files[@]}" -eq 0 ]; then
             echo "unseen: no changed files"
-            exit 0
+          else
+            python3 -m unseen.cli scan --format github $INPUT_ARGS -- "${files[@]}" || frc=$?
           fi
-          python3 -m unseen.cli scan --format github $INPUT_ARGS -- "${files[@]}"
         else
-          python3 -m unseen.cli scan --format github $INPUT_ARGS -- .
+          python3 -m unseen.cli scan --format github $INPUT_ARGS -- . || frc=$?
         fi
+        exit $(( rc > frc ? rc : frc ))
