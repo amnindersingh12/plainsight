@@ -2,7 +2,7 @@ name: pages
 on:
   push:
     branches: [main]
-    paths: ["site/**", ".github/workflows/pages.yml"]
+    paths: ["site/**", "stegsurvive/stegsurvive/**", "stegsurvive/examples/secret.jpg", ".github/workflows/pages.yml"]
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,6 +23,11 @@ jobs:
         with:
           node-version: "20"
       - run: node site/test.mjs
+      - name: Ship the stegsurvive package and example with the site (run in the browser by Pyodide)
+        run: |
+          mkdir -p site/py/stegsurvive site/examples
+          cp stegsurvive/stegsurvive/{__init__,core,rs,attacks}.py site/py/stegsurvive/
+          cp stegsurvive/examples/secret.jpg site/examples/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

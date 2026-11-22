@@ -55,6 +55,8 @@ Classic LSB steganography dies the moment an app recompresses your photo. `stegs
 across the image as fine texture with error correction, so it survives JPEG quality 60-95, resizing to half
 size and WebP, at about 46 dB PSNR.
 
+**[Try it in your browser](https://amnindersingh12.github.io/plainsight/stegsurvive.html)**: upload your own photo, hide or reveal a message. Your image never leaves the page.
+
 ```sh
 pipx install "git+https://github.com/amnindersingh12/plainsight#subdirectory=stegsurvive"
 curl -LO https://github.com/amnindersingh12/plainsight/raw/main/stegsurvive/examples/secret.jpg

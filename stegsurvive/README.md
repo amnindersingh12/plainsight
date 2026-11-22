@@ -9,6 +9,8 @@ stegsurvive is built to survive it.
 *The bundled example: a 27-byte message hidden in a 2000x1250 photo, then shrunk to 1600x1000 and saved as
 JPEG quality 70 (our WhatsApp-style simulation). The message comes back exactly.*
 
+
+**[Try it in your browser](https://amnindersingh12.github.io/plainsight/stegsurvive.html)**: upload your own photo, hide or reveal a message. Your image never leaves the page.
 ## Try it in 60 seconds
 
 **1. Install** (Python 3.10+; depends only on Pillow and numpy):
