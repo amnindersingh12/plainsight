@@ -1,0 +1,6 @@
+- id: unseen
+  name: unseen
+  description: Find invisible Unicode (hidden prompt injection, Trojan Source)
+  entry: unseen/hook.py scan --
+  language: script
+  types: [text]

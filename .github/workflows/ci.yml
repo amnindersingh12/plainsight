@@ -1,0 +1,53 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  unseen:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: unseen
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: python -m unittest discover -s tests -v
+      - name: Dogfood the action on this repo
+        uses: ./unseen
+        with:
+          paths: .
+      - name: Plant a hidden message
+        run: python -c "from unseen.tags import hide; open('bad.md','w',encoding='utf-8').write('ok ' + hide('hi'))"
+      - name: The action must fail on it
+        id: bad
+        uses: ./unseen
+        continue-on-error: true
+        with:
+          paths: unseen/bad.md
+      - run: test "${{ steps.bad.outcome }}" = failure
+  stegsweep:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: stegsweep
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install .
+      - run: python -m unittest discover -s tests -v
+  stegsurvive:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: stegsurvive
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e '.[crypto]'
+      - run: python -m unittest discover -s tests -v
