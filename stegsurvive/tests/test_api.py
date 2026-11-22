@@ -123,11 +123,26 @@ class TestAPI(unittest.TestCase):
     def test_odd_dimensions(self):
         self.assertEqual(reveal(A["resize75+jpeg80"](hide(scene(721, 1283), MSG))), MSG)
 
-    def test_too_flat_is_refused(self):  # nothing can be embedded: must not report success
+    def test_white_and_black_heavy_images_carry_a_message(self):  # user report: screenshots were refused
+        bordered = Image.new("RGB", (1920, 1080), (0, 0, 0))
+        bordered.paste(scene(800, 500), (560, 290))  # 80% pure black
+        for name, img in (("screenshot", screenshot(960, 720)), ("screenshot 1080p", screenshot(1920, 1080)),
+                          ("black border", bordered)):
+            with self.subTest(name):
+                stego = hide(img, MSG)
+                self.assertGreaterEqual(core.psnr(np.asarray(img), np.asarray(stego)), 38.0)
+                for attack in ("jpeg80", "resize50+jpeg80", "whatsapp"):
+                    self.assertEqual(reveal(A[attack](stego)), MSG, attack)
+
+    def test_nothing_embedded_is_never_reported_as_success(self):
+        with mock.patch.object(core, "embed", lambda rgb, *a, **k: rgb):
+            with self.assertRaisesRegex(ValueError, "too flat"):
+                hide(self.img, MSG)
+
+    def test_plain_and_bitmap_images_carry_a_message(self):  # used to be refused as "too flat"
         for img in (Image.new("RGB", (960, 720), (250, 250, 250)), self.img.convert("1")):
             with self.subTest(img.mode):
-                with self.assertRaisesRegex(ValueError, "too flat"):
-                    hide(img, "hello")
+                self.assertEqual(reveal(A["jpeg80"](hide(img, MSG))), MSG)
 
     def test_size_limits(self):
         with self.assertRaisesRegex(ValueError, "256"):
@@ -139,19 +154,6 @@ class TestAPI(unittest.TestCase):
         img = screenshot(1280, 960)
         stego = hide(img, MSG)
         self.assertGreaterEqual(core.psnr(np.asarray(img), np.asarray(stego)), 38.0)
-
-    def test_screenshot_measured(self):  # limitation: white backgrounds carry little; recorded only
-        try:
-            stego = hide(screenshot(960, 720), MSG)
-        except ValueError as e:  # refused up front is fine; a silent bad embed is not
-            self.assertIn("too flat", str(e))
-            print("\nscreenshot 960x720: hide refused (too flat)")
-            return
-        try:
-            ok = reveal(A["jpeg80"](stego)) == MSG
-        except RevealError:
-            ok = False
-        print(f"\nscreenshot 960x720 jpeg80 reveal: {'PASS' if ok else 'FAIL'}")
 
 
 if __name__ == "__main__":

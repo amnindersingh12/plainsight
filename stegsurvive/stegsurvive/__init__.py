@@ -10,7 +10,7 @@ import zlib
 import numpy as np
 from PIL import Image, ImageOps
 
-from . import core, rs
+from . import attacks, core, rs
 
 try:
     from cryptography.exceptions import InvalidTag
@@ -104,16 +104,34 @@ def hide(image, message, password=None):
     if flattened:
         warnings.warn("transparency flattened onto white (platforms flatten it too); output is RGB",
                       UserWarning, stacklevel=2)
-    out = Image.fromarray(core.embed(np.asarray(img.convert("RGB")), bits, key), "RGB")
-    if img.mode == "L":
-        out = out.convert("L")
-    try:  # flat, near-white/black or bitmap images can leave too few slots to carry the frame
-        ok = reveal(out, password) == message
+    rgb = np.asarray(img.convert("RGB"))
+    # Pure white/black pixels cannot move both ways, so screenshots, documents and black borders carry
+    # almost nothing at default settings. Retry with them nudged 2 levels inward (invisible) and the
+    # change allowed closer to the extremes; the decoder needs no hint. Ordinary photos pass first try.
+    # A result is accepted only if it also reads back after a harsh trip (half size + JPEG 80): reading the
+    # untouched file proves little, and some screenshots pass that but break in the apps.
+    fallback = None
+    for head, taper in ((0, core.TAPER), (2, 8.0)):
+        src = np.clip(rgb, head, 255 - head) if head else rgb
+        out = Image.fromarray(core.embed(src, bits, key, taper), "RGB")
+        if img.mode == "L":
+            out = out.convert("L")
+        if _reads(out, message, password):  # never report success for a message that does not read back
+            if _reads(attacks.jpeg(attacks.scale(out, 0.5), 80), message, password):
+                return out
+            fallback = fallback or out
+    if fallback is not None:
+        warnings.warn("the message reads back from this file but may not survive heavy recompression or "
+                      "resizing; a photo with more texture is safer", UserWarning, stacklevel=2)
+        return fallback
+    raise ValueError("this image is too flat to carry a message (almost no texture, e.g. blank or one colour)")
+
+
+def _reads(img, message, password):
+    try:
+        return reveal(img, password) == message
     except RevealError:
-        ok = False
-    if not ok:
-        raise ValueError("this image is too flat to carry a message (needs texture away from pure black/white)")
-    return out
+        return False
 
 
 def reveal(image, password=None):

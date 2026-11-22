@@ -3,6 +3,13 @@
 All notable changes to the three packages in this repository. Versions are per package; release tags
 (`v0.1.0`, `v0.2.0`, ...) cover the whole repository.
 
+## v0.2.1 - 2026-11-22
+
+- stegsurvive 0.1.1: screenshots, documents, logos on transparent backgrounds and photos with black borders
+  no longer fail with "too flat": `hide` retries with pure white/black nudged 2 levels inward. `hide` now also
+  checks that the message survives a half-size JPEG 80 trip before accepting a result, which fixes 1080p
+  screenshots that read back untouched but broke in the apps.
+
 ## v0.2.0 - 2026-11-22
 
 - unseen 0.2.0: the GitHub Action also scans pull request, issue, comment, review and discussion text

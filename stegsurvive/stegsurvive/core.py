@@ -92,17 +92,17 @@ def _erode(a: np.ndarray, r: int) -> np.ndarray:  # min over a (2r+1)^2 window, 
     return win(np.pad(a, ((0, 0), (r, r)), mode="edge"), 2 * r + 1, axis=1).min(-1)
 
 
-def mask(y: np.ndarray) -> np.ndarray:
+def mask(y: np.ndarray, taper: float = TAPER) -> np.ndarray:
     """Relative per-pixel amplitude: more in texture, less in flat areas, 0 at black/white.
     The texture measure is eroded so the flat side of a hard edge is not boosted (no halos)."""
     y = np.asarray(y, dtype=np.float64)  # cumulative sums need float64
     r = max(2, round(min(y.shape) / GRID))
     std = np.sqrt(np.maximum(_box(y * y, r) - _box(y, r) ** 2, 0))
     amp = np.clip(STRENGTH * _erode(std, 2 * r), AMP_MIN, AMP_MAX)
-    return amp * np.clip(np.minimum(y, 255 - y) / TAPER, 0, 1)
+    return amp * np.clip(np.minimum(y, 255 - y) / taper, 0, 1)
 
 
-def embed(rgb: np.ndarray, bits: np.ndarray, key: bytes) -> np.ndarray:
+def embed(rgb: np.ndarray, bits: np.ndarray, key: bytes, taper: float = TAPER) -> np.ndarray:
     """Spread-transform QIM: move each slot's projection onto its bit's lattice with a smooth,
     masked pattern (no cell edges), so the host image itself is not noise for the decoder."""
     _check(rgb)
@@ -113,7 +113,7 @@ def embed(rgb: np.ndarray, bits: np.ndarray, key: bytes) -> np.ndarray:
     perm, sign, dither = _layout(key)
     dh, dw, uh, uw = _down(h), _down(w), _up(h), _up(w)
     y = luma(rgb)
-    m = mask(y)
+    m = mask(y, taper)
     m32 = m.astype(np.float32)
 
     def change(slot_vals):  # slot values -> per-pixel luma change (float32)

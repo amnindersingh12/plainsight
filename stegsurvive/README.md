@@ -101,7 +101,8 @@ moves by more than 4 of 255 levels.*
   The signs and the grouping come from the password (or a fixed key).
 - Spread-transform QIM nudges each slot's average onto the lattice for its bit. The decoder only checks which
   lattice the value sits on, so the picture underneath does not act as noise.
-- The change is stronger in textured areas, weaker in flat ones, and fades out near black and white.
+- The change is stronger in textured areas, weaker in flat ones, and fades out near black and white (or, on
+  the retry, pure black and white are nudged 2 levels inward so they can carry it too).
 - Data path: a 70-byte frame (version and mode, length, 64 data bytes, CRC32) is Reed-Solomon encoded to
   RS(102,70), which repairs up to 16 bad bytes. `reveal` needs only the received image and either returns the
   exact bytes or fails cleanly (in 20,000+ random and corrupted inputs it never
@@ -139,10 +140,12 @@ message); 36 with an AES password (nonce and tag take 28 bytes).
 ## Limitations
 
 - **Crops, rotation and flips break it.** The grid has to line up; a sync search is a v2 candidate.
-- **Flat images and screenshots are weak.** Pure white and black areas are left alone because changing them
-  would show, so a text-on-white screenshot only carries the message in its text strokes: at 960x720 `hide`
-  refuses it ("too flat"), at 1280x960 (PSNR 38.9 dB) it passes every required attack, and at 1920x1080
-  (PSNR 39.1 dB) it fails resize 50%, WhatsApp and Instagram.
+- **Screenshots, documents and black borders** work since 0.1.1: when pure white or black areas leave too
+  little room, `hide` retries with them nudged 2 levels inward (invisible). Measured on synthetic examples:
+  text-on-white screenshots at 1280x960 (38.7 dB) and 1920x1080 (38.4 dB) and a photo inside an 80% black
+  border (40.0 dB) pass every required attack; a 960x720 screenshot (41.1 dB) passes all but WebP.
+- **`hide` checks its own work:** a result is only accepted if the message reads back after a half-size
+  JPEG 80 trip. If it reads back only from the untouched file, you get a warning; if not at all, an error.
 - **Small images:** the targets assume a short side of 720 px or more. Below that `hide` warns; below 256 px
   it refuses.
 - **A faint fine grain** can show on perfectly smooth areas when you compare both images side by side at 100%.

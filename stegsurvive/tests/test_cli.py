@@ -77,10 +77,13 @@ class TestCLI(unittest.TestCase):
         self.assertIn("64", err)
         self.assertFalse(os.path.exists(self.path("long.png")))
 
-    def test_flat_image_refused(self):
+    def test_unembeddable_image_refused(self):  # no real image fails any more; force the failure
+        from unittest import mock
         from PIL import Image
+        from stegsurvive import core
         Image.new("RGB", (960, 720), (250, 250, 250)).save(self.path("flat.png"))
-        code, out, err = self.run_cli("hide", self.path("flat.png"), "hello", "-o", self.path("flat_out.png"))
+        with mock.patch.object(core, "embed", lambda rgb, *a, **k: rgb):
+            code, out, err = self.run_cli("hide", self.path("flat.png"), "hello", "-o", self.path("flat_out.png"))
         self.assertEqual((code, out), (2, ""))
         self.assertIn("too flat", err)
 
