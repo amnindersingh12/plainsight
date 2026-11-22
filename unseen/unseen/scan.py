@@ -78,12 +78,22 @@ def decode(data: bytes) -> tuple[str, str] | None:
     return text, "utf-8"
 
 
+# Signatures of common binary formats. Random compressed bytes can spell a bidi or tag character by chance,
+# so a file whose extension AND first bytes both say "binary" is binary, whatever its byte statistics.
+MAGIC = (b"\x89PNG\r\n\x1a\n", b"\xff\xd8\xff", b"GIF8", b"%PDF-", b"PK\x03\x04", b"\x1f\x8b", b"\xfd7zXZ\x00",
+         b"BZh", b"7z\xbc\xaf\x27\x1c", b"RIFF", b"OggS", b"ID3", b"wOFF", b"wOF2", b"OTTO", b"\x00\x01\x00\x00",
+         b"\x7fELF", b"MZ", b"\xca\xfe\xba\xbe", b"BM", b"\x00\x00\x01\x00")
+
+
 def read_text(path: str) -> tuple[str, str] | None:
     """decode() of a file, or of stdin for '-'."""
     if path == "-":
         return decode(sys.stdin.buffer.read())
     with open(path, "rb") as f:
-        return decode(f.read())
+        data = f.read()
+    if os.path.splitext(path)[1].lower() in BINARY_EXTS and data.startswith(MAGIC):
+        return None
+    return decode(data)
 
 
 def scan_text(text: str, path: str, strict: bool = False,

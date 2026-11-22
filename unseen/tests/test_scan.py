@@ -58,6 +58,20 @@ class ScanTest(unittest.TestCase):
         self.assertEqual([(os.path.basename(f.path), f.category) for f in r.findings], [("Cargo.lock", "zero-width")])
         self.assertEqual((r.files, r.binary), (1, 1))
 
+    def test_real_image_bytes_that_look_like_bidi_stay_binary(self):  # docs/report.png misfired in CI
+        rng = random.Random(1)
+        body = bytes(rng.randrange(1, 256) for _ in range(20000))  # compressed data: almost no NUL bytes
+        png = b"\x89PNG\r\n\x1a\n" + body[:9000] + "\u202e".encode() + body[9000:]
+        jpg = b"\xff\xd8\xff\xe0" + body + "\u202e".encode()
+        write(os.path.join(self.d, "report.png"), png)
+        write(os.path.join(self.d, "photo.jpg"), jpg)
+        r = scan([self.d])
+        self.assertEqual((r.findings, r.files, r.binary), ([], 0, 2))
+
+    def test_binary_magic_only_counts_with_a_binary_extension(self):
+        write(os.path.join(self.d, "fake.md"), b"\x89PNG\r\n\x1a\n" + hide("x").encode())
+        self.assertEqual([f.hidden for f in scan([self.d]).findings], ["x"])
+
     def test_known_binary_extension_with_text_payload_is_scanned(self):
         write(os.path.join(self.d, "notes.pdf"), "plain text " + hide("x"))
         self.assertEqual([f.hidden for f in scan([self.d]).findings], ["x"])
