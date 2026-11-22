@@ -30,7 +30,7 @@ runs:
       run: |
         set -euo pipefail
         # INPUT_ARGS and INPUT_PATHS are word-split on purpose; "--" keeps file names from parsing as flags.
-        # Event text and file names come only from env and files, never from ${{ }} inside this script.
+        # Event text and file names come only from env and files, never from GitHub expressions inside this script.
         rc=0
         if [ "$INPUT_EVENT_TEXT" = "true" ] && [ -n "${GITHUB_EVENT_PATH:-}" ] && [ -f "$GITHUB_EVENT_PATH" ]; then
           python3 -m unseen.cli event --format github $INPUT_ARGS -- "$GITHUB_EVENT_PATH" || rc=$?
