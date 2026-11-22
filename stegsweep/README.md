@@ -1,25 +1,14 @@
 # stegsweep
 
-One command, every steg check: local CTF steganography triage.
+One command, every first steg check. `stegsweep` takes a CTF file (image, audio or anything else), runs the checks
+you would otherwise run by hand with zsteg, stegsolve, binwalk, exiftool, strings and steghide, and lists the
+likely flags first.
 
-## Demo
+![stegsweep finding a flag inside a zip appended to a JPEG](docs/demo.svg)
 
-Real output on the synthetic files from `python tests/fixtures.py demo/` (no optional tools installed):
-
-```
-$ stegsweep demo/lsb.png
-stegsweep: lsb.png (png, 288 bytes)
-[100] lsb         bit0,rgb,xy,msbfirst: picoCTF{l5b_15_n0t_s3cr3t}
-[ 50] lsb         bit0,r,xy,msbfirst: text "^5?QE#v2\"
-notes: exiftool not installed, skipped; binwalk not installed, skipped
-$ stegsweep demo/zip.jpg
-stegsweep: zip.jpg (jpeg, 786 bytes)
-[100] strings     raw: picoCTF{l5b_15_n0t_s3cr3t}
-[ 80] signature   zip at 0x286
-[ 80] trailing    140 bytes after JPEG EOI at 0x286 (zip data)
-[ 10] strings     4 printable strings (8+ chars)
-notes: exiftool not installed, skipped; binwalk not installed, skipped; steghide not installed, skipped
-```
+- Local and offline: nothing is uploaded.
+- One dependency (Pillow). External tools are used when installed and skipped when not.
+- Safe with hostile files: size caps, zip-bomb caps, no shell, extracted data is never executed.
 
 ## Install
 
@@ -27,7 +16,73 @@ notes: exiftool not installed, skipped; binwalk not installed, skipped; steghide
 pipx install "git+https://github.com/amnindersingh12/plainsight#subdirectory=stegsweep"
 ```
 
-Python 3.10+. The only dependency is Pillow.
+Python 3.10+. Or with pip in a virtual environment: `pip install "git+https://github.com/amnindersingh12/plainsight#subdirectory=stegsweep"`.
+
+## Solve your first challenge
+
+The repo ships five practice files in [`examples/`](examples/), each hiding a flag a different way.
+
+**1. Get the examples.**
+
+```
+git clone https://github.com/amnindersingh12/plainsight
+cd plainsight/stegsweep
+```
+
+**2. Sweep a file.** Findings are ranked by score: 100 is a flag, 80 a hidden file, 50 readable text,
+10 background information. Notes say what was skipped.
+
+```
+$ stegsweep examples/01-sky.png
+stegsweep: 01-sky.png (png, 2624 bytes)
+[100] lsb         bit0,rgb,xy,msbfirst: flag{lsb_in_the_sky}
+notes: exiftool not installed, skipped; binwalk not installed, skipped
+```
+
+`bit0,rgb,xy,msbfirst` is where the flag came from: bit 0 of the R, G and B values, pixels read row by row, bits
+packed most significant first (zsteg calls this `b1,rgb,lsb,xy`).
+
+**3. Get the full report.** `-o DIR` saves every extracted stream and a static HTML report with all bit planes.
+
+```
+$ stegsweep examples/01-sky.png -o report
+stegsweep: 01-sky.png (png, 2624 bytes)
+[100] lsb         bit0,rgb,xy,msbfirst: flag{lsb_in_the_sky}
+notes: exiftool not installed, skipped; binwalk not installed, skipped
+report: report/index.html
+```
+
+Open `report/index.html` in a browser:
+
+![stegsweep HTML report: findings table and the 24 bit planes of the image](docs/report.png)
+
+The raw stream is in `report/lsb/bit0_rgb_xy_msbfirst.bin`:
+
+```
+$ xxd report/lsb/bit0_rgb_xy_msbfirst.bin | head -2
+00000000: 666c 6167 7b6c 7362 5f69 6e5f 7468 655f  flag{lsb_in_the_
+00000010: 736b 797d 0000 0000 0000 0000 0000 0000  sky}............
+```
+
+**4. Try the rest.** Each one exercises a different check:
+
+```
+$ stegsweep examples/03-night.png
+stegsweep: 03-night.png (png, 2497 bytes)
+[100] metadata    Comment: CTF{c0mpr3ss3d_c0mm3nts}
+[ 50] metadata    Author: night owl
+[ 10] strings     4 printable strings (8+ chars)
+notes: exiftool not installed, skipped; binwalk not installed, skipped
+
+$ stegsweep examples/04-beep.wav
+stegsweep: 04-beep.wav (wav, 16044 bytes)
+[100] wav-lsb     wav,bit0,msbfirst: flag{l1st3n_t0_th3_l0w_b1ts}
+[ 10] strings     1 printable strings (8+ chars)
+notes: exiftool not installed, skipped; binwalk not installed, skipped; steghide not installed, skipped
+```
+
+`examples/02-sunset.jpg` (shown at the top) and `examples/05-mountains.jpg` are left for you. Hints and answers
+are in [`examples/README.md`](examples/README.md).
 
 ## Usage
 
@@ -35,67 +90,86 @@ Python 3.10+. The only dependency is Pillow.
 stegsweep FILE [-o DIR] [--wordlist FILE] [--flag-format REGEX]
 ```
 
-- `FILE`: the image, audio or other file to triage.
-- `-o DIR`: save extracted data, bit-plane images and `DIR/index.html` (findings plus all bit planes, one static
-  file, no JavaScript). Without `-o` nothing is written.
-- `--wordlist FILE`: passphrase list for stegseek (for example rockyou.txt).
-- `--flag-format REGEX`: what a flag looks like, for example `'picoCTF\{.*?\}'`. The default matches common
-  formats such as `flag{...}`, `picoCTF{...}`, `HTB{...}`, `THM{...}` and `XYZctf{...}`; text glued in front
-  of a known name (`flag.txtpicoCTF{...}`) is trimmed. A custom regex is used as-is.
+| Option | What it does |
+|---|---|
+| `FILE` | The file to triage. |
+| `-o DIR`, `--output DIR` | Save extracted data, bit-plane images and `DIR/index.html`. Without `-o` nothing is written to disk. |
+| `--wordlist FILE` | Passphrase list for stegseek, for example `rockyou.txt`. |
+| `--flag-format REGEX` | What a flag looks like, for example `'myctf\{.*?\}'`. The default matches `flag{...}`, `picoCTF{...}`, `DUCTF{...}`, `HTB{...}`, `THM{...}` and any `<prefix>ctf{...}`. |
 
-The terminal shows at most 15 ranked findings, likely flags first, then notes. Exit code 0 means the sweep ran;
-2 means bad arguments or an unreadable input.
+The terminal shows at most 15 ranked findings; the report has all of them. Exit code 0 means the sweep ran, 2
+means bad arguments or an unreadable input.
 
-If they are installed, stegsweep also runs exiftool (the file goes in on stdin, so a crafted file name cannot
-reach it: CVE-2022-23935), binwalk (`-e`, needs `-o` and binwalk 2.3.4 or newer: CVE-2022-4510), steghide
-(empty passphrase) and stegseek (with `--wordlist`). Missing tools are skipped with a note.
+## What it checks
 
-## How it works
+| Check | Finds | Files |
+|---|---|---|
+| Metadata | Flags and text in PNG `tEXt`/`zTXt`/`iTXt` chunks, JPEG comments, XMP and EXIF (including UTF-16 `XP*` tags and `UserComment`). | images |
+| Trailing data | Bytes after the PNG `IEND` chunk or the JPEG end-of-image marker (found by walking the file structure, so EXIF thumbnails do not count). | PNG, JPEG |
+| Embedded files | zip, png, jpg, pdf, 7z, gzip and ELF signatures anywhere in the file, carved to the next signature (a zip to its end record). | any |
+| Inside zips | Every member of an embedded zip, opened in memory and searched for flags; encrypted members are listed with a cracking hint. | any |
+| Strings | Printable text and flags in the raw bytes. | any |
+| PNG structure | CRC mismatches, unknown chunks, truncation. | PNG |
+| LSB sweep (zsteg-style) | Every channel order, bits 0, 1 and 2 on their own and bits 0-1 together (3- and 4-channel orders), row or column order, MSB- or LSB-first packing; each stream is checked for flags, file signatures and readable text. | lossless images |
+| WAV LSB | The same for the low bit of each audio sample. | WAV |
+| Bit planes (stegsolve-style) | All 8 planes of every channel saved as images in the report. | images (with `-o`) |
 
-The file is read once (up to 200 MiB) and every check works on those bytes. A check that fails on a broken
-file becomes a note; the sweep goes on.
+## Optional external tools
 
-- **Metadata:** PNG text chunks, JPEG comments, XMP and EXIF, searched for flags.
-- **Hidden data:** bytes after the PNG `IEND` chunk or the JPEG `EOI` marker (found by walking the structure, so
-  EXIF thumbnails do not count), embedded zip, png, jpg, pdf, 7z, gzip and ELF signatures, and printable strings.
-  A carved file runs to the next signature (a zip to its end-of-central-directory record), at most 200 MiB in
-  total.
-- **Inside zips:** embedded zips are opened in memory and every member is searched for flags and text (at most
-  50 MiB per member and 200 MiB in all, so zip bombs stop at the cap). Encrypted members are listed with a hint
-  to crack them (zip2john, fcrackzip). Members are saved only under `-o`, with generated names.
-- **PNG structure:** CRC mismatches, unknown chunks and truncation.
-- **LSB sweep (zsteg-style):** for lossless images, every channel order, bit planes 0-2, bits 0-1 together
-  (zsteg `b2`, for 3- and 4-channel orders), row or column order, MSB- or LSB-first bit packing; each stream is checked for flags, file signatures and readable text. WAV
-  audio gets the same for sample LSBs.
-- **Bit planes (stegsolve-style):** all 8 planes of every channel saved as images in the report.
-- **External tools:** run without a shell, with a timeout and an absolute input path (exiftool reads stdin);
-  their output files are read, never executed.
+stegsweep uses these when they are on your `PATH` and notes when they are not. They run without a shell, with a
+120 s timeout, and their output is read, never executed.
+
+| Tool | Adds | Runs on | Install (Debian/Ubuntu) |
+|---|---|---|---|
+| [exiftool](https://exiftool.org/) | Complete metadata. The file goes in on stdin, so a crafted file name cannot trigger CVE-2022-23935 (exiftool < 12.38). | any file | `apt install libimage-exiftool-perl` |
+| [binwalk](https://github.com/ReFirmLabs/binwalk) | `binwalk -e` extraction. Needs `-o`, and only runs on binwalk 2.3.4 or newer (CVE-2022-4510). | any file | `apt install binwalk` (check `binwalk --help` shows 2.3.4+) or the binwalk releases page |
+| [steghide](https://steghide.sourceforge.net/) | Extraction with an empty passphrase. | JPEG, BMP, WAV | `apt install steghide` |
+| [stegseek](https://github.com/RickdeJager/stegseek) | Fast steghide passphrase cracking with `--wordlist`. | JPEG, BMP, WAV | `.deb` from the stegseek releases page |
+
+## Safety with untrusted files
+
+CTF files are made by strangers, so stegsweep treats every input as hostile:
+
+- Inputs over 200 MiB and images over 40 megapixels are refused before decoding.
+- Only PNG, JPEG, GIF, BMP, TIFF and WebP are decoded (never formats that call Ghostscript).
+- Each extracted file is capped at 50 MiB, zip members are read with a running cap (zip bombs stop at the cap),
+  and total carved data is capped too.
+- Saved files get generated names inside `DIR`, so names from inside the file cannot escape it.
+- Everything printed or written to the report is escaped, so a file cannot inject terminal codes or HTML.
 
 ## Limitations
 
-- LSB extraction scans the first 1 MiB per configuration, and about 14 s goes into a 12 Mpx RGBA image.
-- 16-bit images (16-bit PNG, 16-bit TIFF) are reduced to 8 bits first, so their LSBs are not checked.
-- No JPEG DCT-domain steg detection except through steghide or stegseek.
-- Images over 40 Mpx are refused before decoding; inputs over 200 MiB are refused.
-- Ranking is heuristic: a high score means "look here first", not proof.
-- Reusing a `-o` directory leaves files from earlier runs on disk; the report lists only the current run.
+- The LSB sweep reads the first 1 MiB of each configuration; a 12-megapixel RGBA image takes about 14 s.
+- 16-bit images are reduced to 8 bits first, so their LSBs are not checked.
+- No JPEG DCT-domain detection except through steghide or stegseek.
+- Ranking is a heuristic: a high score means "look here first", not proof.
+- Reusing an `-o` directory leaves files from earlier runs on disk; the report lists only the current run.
 
 ## Prior art
 
-stegsweep runs the common first checks in one go; for deep work the dedicated tools are better:
+stegsweep runs the common first checks in one go. For deeper work, the dedicated tools are better:
 
-- [zsteg](https://github.com/zed-0xff/zsteg): the LSB sweep this copies, with more configurations (Ruby).
+- [zsteg](https://github.com/zed-0xff/zsteg): the LSB sweep this follows, with more configurations (Ruby).
 - [stegsolve](https://github.com/zardus/ctf-tools/tree/master/stegsolve): interactive bit-plane viewer (Java).
-- [binwalk](https://github.com/ReFirmLabs/binwalk): real embedded-file carving and extraction.
+- [binwalk](https://github.com/ReFirmLabs/binwalk): full embedded-file carving and extraction.
 - [exiftool](https://exiftool.org/): complete metadata reading.
 - [steghide](https://steghide.sourceforge.net/) and [stegseek](https://github.com/RickdeJager/stegseek):
   extraction and fast passphrase cracking for steghide.
 - [pngcheck](http://www.libpng.org/pub/png/apps/pngcheck.html): thorough PNG structure checks.
-- [Aperi'Solve](https://www.aperisolve.com/): runs many of these tools as a website; the file must be uploaded.
+- [Aperi'Solve](https://www.aperisolve.com/): runs many of these as a website; the file has to be uploaded.
+
+## Development
+
+```
+cd stegsweep
+python -m venv .venv && .venv/bin/pip install -e .
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/python examples/make_examples.py   # regenerate the practice files
+```
 
 ## See also
 
-- [unseen](../unseen): scan text for invisible Unicode used in AI prompt injection.
+- [unseen](../unseen): scan text and code for invisible Unicode used in AI prompt injection.
 - [stegsurvive](../stegsurvive): hidden messages that survive social media recompression.
 
 ## License

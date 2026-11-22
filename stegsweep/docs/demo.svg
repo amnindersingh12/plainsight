@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="904" height="266" viewBox="0 0 904 266">
+<rect width="904" height="266" rx="10" fill="#0d1117"/>
+<rect width="904" height="30" rx="10" fill="#161b22"/><rect y="20" width="904" height="10" fill="#161b22"/>
+<circle cx="18" cy="15" r="6" fill="#ff5f56"/>
+<circle cx="38" cy="15" r="6" fill="#ffbd2e"/>
+<circle cx="58" cy="15" r="6" fill="#27c93f"/>
+<text x="452.0" y="20" fill="#8b949e" font-family="sans-serif" font-size="12" text-anchor="middle">stegsweep</text>
+<g font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,DejaVu Sans Mono,monospace" font-size="14">
+<text x="18" y="63"><tspan fill="#3fb950">$ </tspan><tspan fill="#e6edf3">stegsweep&#160;examples/02-sunset.jpg</tspan></text>
+<text x="18" y="83"><tspan fill="#c9d1d9">stegsweep:&#160;02-sunset.jpg&#160;(jpeg,&#160;7886&#160;bytes)</tspan></text>
+<text x="18" y="103"><tspan fill="#f2cc60">[100]&#160;zip&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;zip:flag.txt:&#160;picoCTF{z1p_4ft3r_th3_3nd}</tspan></text>
+<text x="18" y="123"><tspan fill="#c9d1d9">[&#160;80]&#160;signature&#160;&#160;&#160;zip&#160;at&#160;0x1dc4</tspan></text>
+<text x="18" y="143"><tspan fill="#c9d1d9">[&#160;80]&#160;signature&#160;&#160;&#160;zip&#160;at&#160;0x1e07</tspan></text>
+<text x="18" y="163"><tspan fill="#c9d1d9">[&#160;80]&#160;trailing&#160;&#160;&#160;&#160;266&#160;bytes&#160;after&#160;JPEG&#160;EOI&#160;at&#160;0x1dc4&#160;(zip&#160;data)</tspan></text>
+<text x="18" y="183"><tspan fill="#c9d1d9">[&#160;50]&#160;zip&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;zip:flag.txt:&#160;27&#160;bytes</tspan></text>
+<text x="18" y="203"><tspan fill="#c9d1d9">[&#160;50]&#160;zip&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;zip:readme.txt:&#160;400&#160;bytes</tspan></text>
+<text x="18" y="223"><tspan fill="#c9d1d9">[&#160;10]&#160;strings&#160;&#160;&#160;&#160;&#160;7&#160;printable&#160;strings&#160;(8+&#160;chars)</tspan></text>
+<text x="18" y="243"><tspan fill="#c9d1d9">notes:&#160;exiftool&#160;not&#160;installed,&#160;skipped;&#160;binwalk&#160;not&#160;installed,&#160;skipped;&#160;steghide&#160;not&#160;installed,&#160;skipped</tspan></text>
+</g>
+</svg>
